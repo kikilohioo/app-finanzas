@@ -41,7 +41,7 @@ function App() {
         </Header>
         <Content className="p-6">
           <Routes>
-            <Route path="/" element={<ExpenseForm />} />
+            <Route path="/app-finanzas" element={<ExpenseForm />} />
             <Route path="/list" element={<ExpenseList />} />
             <Route path="/summary" element={<ExpenseSummary />} />
             <Route path="/alerts" element={<AlertSettings />} />
