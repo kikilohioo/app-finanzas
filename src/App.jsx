@@ -14,7 +14,7 @@ function App() {
     {
       key: '1',
       icon: <DollarOutlined />,
-      label: <Link to="/">Registrar Gasto</Link>,
+      label: <Link to="/app-finanzas">Registrar Gasto</Link>,
     },
     {
       key: '2',
