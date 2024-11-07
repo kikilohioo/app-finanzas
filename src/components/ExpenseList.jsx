@@ -4,6 +4,7 @@ import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { startOfMonth, endOfMonth, format, parseISO } from 'date-fns';
 import { DatePicker } from 'antd';
 import dateFnsGenerateConfig from 'rc-picker/lib/generate/dateFns';
+import axios from 'axios';
 
 const MyDatePicker = DatePicker.generatePicker(dateFnsGenerateConfig);
 const { RangePicker } = MyDatePicker;
@@ -23,22 +24,32 @@ const ExpenseList = () => {
   const [form] = Form.useForm();
 
   useEffect(() => {
-    // Fetch expenses based on date range
-    // This is where you'd typically make an API call
-    // For now, we'll use mock data
-    const mockExpenses = [
-      { id: 1, amount: 50, store: 'Supermarket', paymentType: 'debit', date: '2024-03-01', category: 'Comida' },
-      { id: 2, amount: 30, store: 'Pharmacy', paymentType: 'credit', date: '2024-03-05', category: 'Salud' },
-      // ... more mock data
-    ];
-    setExpenses(mockExpenses);
-  }, [dateRange]);
+    fetchExpenses()
+  }, []);
+
+  const fetchExpenses = async () => {
+    try {
+      const [startDate, endDate] = dateRange;
+
+      const response = await axios.get('http://localhost:3000/api/expenses', {
+        params: {
+          startDate: startDate.toISOString().split('T')[0], // Formato YYYY-MM-DD
+          endDate: endDate.toISOString().split('T')[0],
+        },
+      });
+      setExpenses(response.data);
+    } catch (error) {
+      console.error('Error al obtener los gastos:', error);
+    }
+  };
 
   const handleDateRangeChange = (dates) => {
     setDateRange(dates);
   };
 
   const showEditModal = (record) => {
+    console.log(record);
+
     setEditingExpense(record);
     form.setFieldsValue({
       ...record,
@@ -47,26 +58,31 @@ const ExpenseList = () => {
     setIsModalVisible(true);
   };
 
-  const handleDelete = (id) => {
-    // Delete logic here
-    setExpenses(expenses.filter(expense => expense.id !== id));
-    message.success('Gasto eliminado exitosamente');
+  const updateExpense = async (updatedData) => {
+    try {
+      await axios.put(`http://localhost:3000/api/expenses/${updatedData.id}`, updatedData);
+      setIsModalVisible(false);
+      setEditingExpense(null)
+      fetchExpenses();
+    } catch (error) {
+      console.error('Error al actualizar el gasto:', error);
+    }
   };
 
-  const handleEdit = (values) => {
-    // Edit logic here
-    setExpenses(expenses.map(expense => 
-      expense.id === editingExpense.id ? { ...expense, ...values, date: format(values.date, 'yyyy-MM-dd') } : expense
-    ));
-    setIsModalVisible(false);
-    message.success('Gasto actualizado exitosamente');
+  const deleteExpense = async (id) => {
+    try {
+      await axios.delete(`http://localhost:3000/api/expenses/${id}`);
+      fetchExpenses();
+    } catch (error) {
+      console.error('Error al eliminar el gasto:', error);
+    }
   };
 
   const columns = [
     { title: 'Valor', dataIndex: 'amount', key: 'amount', render: (text) => `$${text}` },
     { title: 'Tienda', dataIndex: 'store', key: 'store' },
     { title: 'Tipo de Pago', dataIndex: 'paymentType', key: 'paymentType' },
-    { title: 'Fecha', dataIndex: 'date', key: 'date' },
+    { title: 'Fecha', dataIndex: 'date', key: 'date', render: (date) => new Date(date).toLocaleDateString('es-ES') },
     { title: 'Categoría', dataIndex: 'category', key: 'category' },
     {
       title: 'Acciones',
@@ -74,7 +90,7 @@ const ExpenseList = () => {
       render: (_, record) => (
         <Space size="middle">
           <Button icon={<EditOutlined />} onClick={() => showEditModal(record)} />
-          <Button icon={<DeleteOutlined />} onClick={() => handleDelete(record.id)} danger />
+          <Button icon={<DeleteOutlined />} onClick={() => deleteExpense(record.id)} danger />
         </Space>
       ),
     },
@@ -88,16 +104,20 @@ const ExpenseList = () => {
           value={dateRange}
           onChange={handleDateRangeChange}
         />
+        <Button onClick={fetchExpenses}>Buscar</Button>
       </Space>
       <Table columns={columns} dataSource={expenses} rowKey="id" />
-      
+
       <Modal
         title="Editar Gasto"
         open={isModalVisible}
         onOk={form.submit}
         onCancel={() => setIsModalVisible(false)}
       >
-        <Form form={form} layout="vertical" onFinish={handleEdit}>
+        <Form form={form} layout="vertical" onFinish={updateExpense}>
+          <Form.Item name="id" style={{ display: 'none' }}>
+            <Input type="hidden" />
+          </Form.Item>
           <Form.Item name="amount" label="Valor" rules={[{ required: true }]}>
             <Input type="number" prefix="$" />
           </Form.Item>

@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { format } from 'date-fns';
 import { DatePicker } from 'antd';
 import dateFnsGenerateConfig from 'rc-picker/lib/generate/dateFns';
+import axios from 'axios';
 
 const MyDatePicker = DatePicker.generatePicker(dateFnsGenerateConfig);
 
@@ -17,7 +18,7 @@ const categories = [
 const ExpenseForm = () => {
   const [form] = Form.useForm();
 
-  const onFinish = (values) => {
+  const onFinish = async (values) => {
     const expense = {
       id: uuidv4(),
       ...values,
@@ -25,9 +26,14 @@ const ExpenseForm = () => {
     };
     
     // Here you would typically save the expense to your state or backend
-    console.log('Expense submitted:', expense);
-    message.success('Gasto registrado exitosamente');
-    form.resetFields();
+    try {
+      const response = await axios.post('http://localhost:3000/api/expenses', expense);
+      console.log(response); // "Gasto registrado con éxito."
+      message.success('Gasto registrado exitosamente');
+      form.resetFields();
+    } catch (error) {
+      console.error('Error al registrar el gasto:', error);
+    }
   };
 
   return (

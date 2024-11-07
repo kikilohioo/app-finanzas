@@ -14,7 +14,7 @@ function App() {
     {
       key: '1',
       icon: <DollarOutlined />,
-      label: <Link to="/app-finanzas">Registrar Gasto</Link>,
+      label: <Link to="/">Registrar Gasto</Link>,
     },
     {
       key: '2',
@@ -41,7 +41,7 @@ function App() {
         </Header>
         <Content className="p-6">
           <Routes>
-            <Route path="/app-finanzas" element={<ExpenseForm />} />
+            <Route path="/" element={<ExpenseForm />} />
             <Route path="/list" element={<ExpenseList />} />
             <Route path="/summary" element={<ExpenseSummary />} />
             <Route path="/alerts" element={<AlertSettings />} />
