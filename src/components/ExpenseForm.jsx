@@ -47,7 +47,7 @@ const ExpenseForm = () => {
           <Input />
         </Form.Item>
         <Form.Item name="paymentType" label="Tipo de Pago" rules={[{ required: true }]}>
-          <Select>
+          <Select placeholder="Seleccione tipo de pago">
             <Option value="credit">Crédito</Option>
             <Option value="debit">Débito</Option>
             <Option value="cash">Efectivo</Option>

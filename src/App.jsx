@@ -2,10 +2,10 @@ import React from 'react';
 import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 import { Layout, Menu } from 'antd';
 import { DollarOutlined, UnorderedListOutlined, PieChartOutlined, BellOutlined } from '@ant-design/icons';
-import ExpenseForm from './components/ExpenseForm';
-import ExpenseList from './components/ExpenseList';
-import ExpenseSummary from './components/ExpenseSummary';
+import FormsPage from './components/FormsPage';
+import ListsPage from './components/ListsPage';
 import AlertSettings from './components/AlertSettings';
+import Summary from './components/Summary';
 
 const { Header, Content, Footer } = Layout;
 
@@ -41,9 +41,9 @@ function App() {
         </Header>
         <Content className="p-6">
           <Routes>
-            <Route path="/" element={<ExpenseForm />} />
-            <Route path="/list" element={<ExpenseList />} />
-            <Route path="/summary" element={<ExpenseSummary />} />
+            <Route path="/" element={<FormsPage />} />
+            <Route path="/list" element={<ListsPage />} />
+            <Route path="/summary" element={<Summary />} />
             <Route path="/alerts" element={<AlertSettings />} />
           </Routes>
         </Content>

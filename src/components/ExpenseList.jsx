@@ -107,7 +107,6 @@ const ExpenseList = () => {
         <Button onClick={fetchExpenses}>Buscar</Button>
       </Space>
       <Table columns={columns} dataSource={expenses} rowKey="id" />
-
       <Modal
         title="Editar Gasto"
         open={isModalVisible}
