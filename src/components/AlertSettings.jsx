@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Form, Input, Select, Button, List, Card, Modal, message } from 'antd';
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
+import { v4 as uuidv4 } from 'uuid';  // Importación de la librería uuid
+import axios from 'axios';
+import { API_URL } from '../utils/consts'
+
 
 const { Option } = Select;
 
@@ -9,22 +13,17 @@ const categories = [
   'Salud', 'Educación', 'Ropa', 'Hogar', 'Otros'
 ];
 
-const AlertSettings = () => {
+const AlertSettings = ({isMobile}) => {
   const [alerts, setAlerts] = useState([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [editingAlert, setEditingAlert] = useState(null);
   const [form] = Form.useForm();
 
   useEffect(() => {
-    // Fetch existing alerts
-    // This is where you'd typically make an API call
-    // For now, we'll use mock data
-    const mockAlerts = [
-      { id: 1, category: 'General', limit: 1000 },
-      { id: 2, category: 'Comida', limit: 300 },
-      // ... more mock data
-    ];
-    setAlerts(mockAlerts);
+    // Fetch existing alerts from the API
+    axios.get(API_URL+'/api/alerts')
+      .then(response => setAlerts(response.data))
+      .catch(error => console.error('Error fetching alerts:', error));
   }, []);
 
   const showModal = (alert = null) => {
@@ -38,25 +37,37 @@ const AlertSettings = () => {
     setIsModalVisible(true);
   };
 
-  const handleOk = (values) => {
-    if (editingAlert) {
-      // Update existing alert
-      setAlerts(alerts.map(alert => 
-        alert.id === editingAlert.id ? { ...alert, ...values } : alert
-      ));
-      message.success('Alerta actualizada exitosamente');
-    } else {
-      // Add new alert
-      const newAlert = { id: Date.now(), ...values };
-      setAlerts([...alerts, newAlert]);
-      message.success('Nueva alerta creada exitosamente');
+  const handleOk = async (values) => {
+    try {
+      if (editingAlert) {
+        // Update existing alert
+        const updatedAlert = { ...editingAlert, ...values };
+        await axios.put(API_URL+`/api/alerts/${editingAlert.id}`, updatedAlert);
+        setAlerts(alerts.map(alert => (alert.id === editingAlert.id ? updatedAlert : alert)));
+        message.success('Alerta actualizada exitosamente');
+      } else {
+        // Create new alert with generated UUID
+        const newAlert = { id: uuidv4(), ...values };
+        await axios.post(API_URL+'/api/alerts', newAlert);
+        setAlerts([...alerts, newAlert]);
+        message.success('Nueva alerta creada exitosamente');
+      }
+      setIsModalVisible(false);
+    } catch (error) {
+      console.error('Error saving alert:', error);
+      message.error('Hubo un problema al guardar la alerta');
     }
-    setIsModalVisible(false);
   };
 
-  const handleDelete = (id) => {
-    setAlerts(alerts.filter(alert => alert.id !== id));
-    message.success('Alerta eliminada exitosamente');
+  const handleDelete = async (id) => {
+    try {
+      await axios.delete(API_URL+`/api/alerts/${id}`);
+      setAlerts(alerts.filter(alert => alert.id !== id));
+      message.success('Alerta eliminada exitosamente');
+    } catch (error) {
+      console.error('Error deleting alert:', error);
+      message.error('Hubo un problema al eliminar la alerta');
+    }
   };
 
   return (
@@ -66,7 +77,7 @@ const AlertSettings = () => {
         Crear Nueva Alerta
       </Button>
       <List
-        grid={{ gutter: 16, column: 3 }}
+        grid={{ gutter: 16, column: isMobile ? 1 : 3 }}
         dataSource={alerts}
         renderItem={item => (
           <List.Item>
@@ -84,7 +95,7 @@ const AlertSettings = () => {
       />
       <Modal
         title={editingAlert ? "Editar Alerta" : "Crear Nueva Alerta"}
-        visible={isModalVisible}
+        open={isModalVisible}
         onOk={form.submit}
         onCancel={() => setIsModalVisible(false)}
       >

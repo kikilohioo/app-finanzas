@@ -5,6 +5,7 @@ import { startOfMonth, endOfMonth, format, parseISO } from 'date-fns';
 import { DatePicker } from 'antd';
 import dateFnsGenerateConfig from 'rc-picker/lib/generate/dateFns';
 import axios from 'axios';
+import { API_URL } from '../utils/consts'
 
 const MyDatePicker = DatePicker.generatePicker(dateFnsGenerateConfig);
 const { RangePicker } = MyDatePicker;
@@ -30,10 +31,11 @@ const ExpenseList = () => {
   const fetchExpenses = async () => {
     try {
       const [startDate, endDate] = dateRange;
-
-      const response = await axios.get('http://localhost:3000/api/expenses', {
+      console.log(API_URL);
+      
+      const response = await axios.get(API_URL+'/api/expenses', {
         params: {
-          startDate: startDate.toISOString().split('T')[0], // Formato YYYY-MM-DD
+          startDate: startDate.toISOString().split('T')[0], // Formato dd/MM/yyyy
           endDate: endDate.toISOString().split('T')[0],
         },
       });
@@ -60,7 +62,7 @@ const ExpenseList = () => {
 
   const updateExpense = async (updatedData) => {
     try {
-      await axios.put(`http://localhost:3000/api/expenses/${updatedData.id}`, updatedData);
+      await axios.put(API_URL+`/api/expenses/${updatedData.id}`, updatedData);
       setIsModalVisible(false);
       setEditingExpense(null)
       fetchExpenses();
@@ -71,7 +73,7 @@ const ExpenseList = () => {
 
   const deleteExpense = async (id) => {
     try {
-      await axios.delete(`http://localhost:3000/api/expenses/${id}`);
+      await axios.delete(API_URL+`/api/expenses/${id}`);
       fetchExpenses();
     } catch (error) {
       console.error('Error al eliminar el gasto:', error);
@@ -106,7 +108,7 @@ const ExpenseList = () => {
         />
         <Button onClick={fetchExpenses}>Buscar</Button>
       </Space>
-      <Table columns={columns} dataSource={expenses} rowKey="id" />
+      <Table columns={columns} dataSource={expenses} rowKey="id" scroll={{ x: 1000 }} />
       <Modal
         title="Editar Gasto"
         open={isModalVisible}

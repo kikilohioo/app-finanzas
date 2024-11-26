@@ -5,10 +5,12 @@ import { startOfMonth, endOfMonth, parseISO } from 'date-fns';
 import { DatePicker } from 'antd';
 import dateFnsGenerateConfig from 'rc-picker/lib/generate/dateFns';
 import axios from 'axios';
+import { API_URL } from '../utils/consts'
 
 const MyDatePicker = DatePicker.generatePicker(dateFnsGenerateConfig);
 const { RangePicker } = MyDatePicker;
 const { Option } = Select;
+
 
 const IncomeList = () => {
 	const [incomes, setIncomes] = useState([]);
@@ -24,7 +26,7 @@ const IncomeList = () => {
 	const fetchIncomes = async () => {
 		try {
 			const [startDate, endDate] = dateRange;
-			const response = await axios.get('http://localhost:3000/api/incomes', {
+			const response = await axios.get(API_URL+'/api/incomes', {
 				params: {
 					startDate: startDate.toISOString().split('T')[0],
 					endDate: endDate.toISOString().split('T')[0],
@@ -51,7 +53,7 @@ const IncomeList = () => {
 
 	const updateIncome = async (updatedData) => {
 		try {
-			await axios.put(`http://localhost:3000/api/incomes/${updatedData.id}`, updatedData);
+			await axios.put(API_URL+`/api/incomes/${updatedData.id}`, updatedData);
 			setIsModalVisible(false);
 			setEditingIncome(null);
 			fetchIncomes();
@@ -62,7 +64,7 @@ const IncomeList = () => {
 
 	const deleteIncome = async (id) => {
 		try {
-			await axios.delete(`http://localhost:3000/api/incomes/${id}`);
+			await axios.delete(API_URL+`/api/incomes/${id}`);
 			fetchIncomes();
 		} catch (error) {
 			console.error('Error al eliminar el ingreso:', error);
@@ -95,7 +97,7 @@ const IncomeList = () => {
 				/>
 				<Button onClick={fetchIncomes}>Buscar</Button>
 			</Space>
-			<Table columns={columns} dataSource={incomes} rowKey="id" />
+			<Table columns={columns} dataSource={incomes} rowKey="id" scroll={{ x: 1000 }} />
 			<Modal
 				title="Editar Ingreso"
 				open={isModalVisible}

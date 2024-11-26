@@ -5,6 +5,8 @@ import { format } from 'date-fns';
 import { DatePicker } from 'antd';
 import dateFnsGenerateConfig from 'rc-picker/lib/generate/dateFns';
 import axios from 'axios';
+import { API_URL } from '../utils/consts'
+
 
 const MyDatePicker = DatePicker.generatePicker(dateFnsGenerateConfig);
 
@@ -19,7 +21,7 @@ const IncomeForm = () => {
 		};
 
 		try {
-			const response = await axios.post('http://localhost:3000/api/incomes', income);
+			const response = await axios.post(API_URL + '/api/incomes', income);
 			message.success('Ingreso registrado exitosamente');
 			form.resetFields();
 		} catch (error) {
@@ -40,7 +42,7 @@ const IncomeForm = () => {
 					name="amount"
 					rules={[{ required: true, message: 'Por favor ingresa el monto' }]}
 				>
-					<Input type="number" placeholder="Ingresa el monto" />
+					<Input type="number" placeholder="Ingresa el monto" prefix="$" />
 				</Form.Item>
 
 				<Form.Item
@@ -49,12 +51,12 @@ const IncomeForm = () => {
 					rules={[{ required: true, message: 'Por favor selecciona una fuente' }]}
 				>
 					<Select placeholder="Selecciona la fuente">
-						<Option value="Sueldo">Sueldo</Option>
-						<Option value="Otros">Otros</Option>
+						<Select.Option value="Sueldo">Sueldo</Select.Option>
+						<Select.Option value="Otros">Otros</Select.Option>
 					</Select>
 				</Form.Item>
-				<Form.Item name="date" label="Fecha" rules={[{ required: true }]}>
-					<MyDatePicker className="w-full" />
+				<Form.Item name="date" label="Fecha" initialValue={new Date()} rules={[{ required: true }]}>
+					<MyDatePicker className="w-full" format="dd/MM/yyyy" />
 				</Form.Item>
 				<Form.Item
 					label="Descripción"
